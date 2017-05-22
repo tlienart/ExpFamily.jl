@@ -33,6 +33,15 @@ npFromMP = natparam(gMP)
 @test_throws DomainError GaussianNatParam(mu=m, cov=-C, check=true)
 @test_throws DomainError GaussianMeanParam(mu=m, cov=-C, check=true)
 
+dim = 4
+gNPones = ones(GaussianNatParam, dim)
+gMPones = ones(GaussianMeanParam, dim)
+
+@test isapprox(mean(gNPones), zeros(dim))
+@test isapprox(cov(gNPones),  eye(dim))
+@test isapprox(mean(gMPones), zeros(dim))
+@test isapprox(cov(gMPones),  eye(dim))
+
 gNP2 = gNP+gNP
 
 @test isapprox(gNP2.theta1, gNP.theta1+gNP.theta1)

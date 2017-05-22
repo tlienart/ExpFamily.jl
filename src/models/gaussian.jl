@@ -37,6 +37,8 @@ const Gauss   = Union{GaussNP, GaussMP}
 ## Constructors #
 #################
 
+### Gaussian Natural Parameter
+
 function GaussianNatParam(t1::Vector{Float}, t2::Matrix{Float},
                           check=false)::GaussNP
     (check && !isposdef(-t2)) ? throw(DomainError()) : nothing
@@ -47,6 +49,8 @@ function GaussianNatParam(;mu::Vector{Float}=[0.0], cov::Matrix{Float}=[1.0],
     P = inv(cov)
     GaussianNatParam(P*mu, -P, check)
 end
+
+### Gaussian Mean Parameter
 
 function GaussianMeanParam(m1::Vector{Float}, m2::Matrix{Float},
                            check=false)::GaussMP
@@ -85,8 +89,8 @@ Base.var(g::Gauss)    = diag(cov(g))
 Base.isvalid(g::GaussNP)  = isposdef(-g.theta2.data)
 Base.isvalid(g::GaussMP) = isposdef(2.0g.mu2.data-g.mu1*g.mu1')
 
-Base.ones(::GaussNP, d::Int) = GaussianNatParam(mu=zeros(d), cov=eye(d))
-Base.ones(::GaussMP, d::Int) = GaussianMeanParam(mu=zeros(d), cov=eye(d))
+Base.ones(::Type{GaussNP}, d::Int) = GaussianNatParam(mu=zeros(d), cov=eye(d))
+Base.ones(::Type{GaussMP}, d::Int) = GaussianMeanParam(mu=zeros(d), cov=eye(d))
 # zeros does not really make sense
 
 ###################
