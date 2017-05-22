@@ -7,8 +7,7 @@ using Compat
 @compat abstract type NatParam end
 @compat abstract type MeanParam end
 
-const Int   = Int64
-const Float = Float64
+const Float = (Int==Int64) ? Float64 : Float32
 
 export
     natparam,
