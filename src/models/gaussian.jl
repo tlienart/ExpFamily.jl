@@ -55,7 +55,7 @@ function GaussianMeanParam(m1::Vector{Float}, m2::Matrix{Float},
 end
 function GaussianMeanParam(;mu::Vector{Float}=[0.0], cov::Matrix{Float}=[1.0],
                             check=false)::GaussMP
-    GaussianMeanParam(mu, 0.5(mu*mu'+cov))
+    GaussianMeanParam(mu, 0.5(mu*mu'+cov), check)
 end
 
 ###############
