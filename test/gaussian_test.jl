@@ -82,3 +82,8 @@ gMPtest = gMPa + gMPb - meanparam(gNPb)
 @test isapprox(gNPtest.theta2, gNPa.theta2)
 @test isapprox(gMPtest.mu1, gMPa.mu1)
 @test isapprox(gMPtest.mu2, gMPa.mu2)
+
+@test isapprox(gMPtest, gMPa)
+
+@test isapprox(GaussianNatParam(vec(gNPa),dim),gNPa)
+@test isapprox(GaussianMeanParam(vec(gMPa),dim),gMPa)

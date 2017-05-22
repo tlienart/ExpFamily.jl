@@ -53,6 +53,12 @@ function GaussianNatParam(;mean::Vector{Float}=[0.0],
     GaussianNatParam(P*mean, -P, check)
 end
 
+# Constructor for GaussianNatParam assuming theta=[theta1;theta2[:]].
+function GaussianNatParam(theta::Vector{Float}, d::Int)
+    @assert length(theta)==d+d^2 "inconsistent dimensions"
+    GaussianNatParam(theta[1:d], reshape(theta[d+1:end],d,d))
+end
+
 ### Gaussian Mean Parameter
 
 function GaussianMeanParam(m1::Vector{Float}, m2::Matrix{Float},
@@ -66,6 +72,11 @@ function GaussianMeanParam(;mean::Vector{Float}=[0.0],
                             check=false)::GaussMP
     #
     GaussianMeanParam(mean, 0.5(mean*mean'+cov), check)
+end
+# Constructor for GaussianNatParam assuming theta=[theta1;theta2[:]].
+function GaussianMeanParam(mu::Vector{Float}, d::Int)
+    @assert length(mu)==d+d^2 "inconsistent dimensions"
+    GaussianMeanParam(mu[1:d], reshape(mu[d+1:end],d,d))
 end
 
 ###############
@@ -100,7 +111,7 @@ Base.ones(::Type{GaussNP}, d::Int) =
     GaussianNatParam(mean=zeros(d), cov=eye(d))
 Base.ones(::Type{GaussMP}, d::Int) =
     GaussianMeanParam(mean=zeros(d), cov=eye(d))
-# zeros does not really make sense
+# NOTE zeros does not really make sense
 
 Base.length(g::GaussNP) = length(g.theta1)
 Base.length(g::GaussMP) = length(g.mu1)
@@ -110,17 +121,20 @@ Base.rand(g::GaussNP, n::Int=1) =
 Base.rand(g::GaussMP, n::Int=1) =
     repmat(mean(g),1,n)+chol(cov(g))*randn(length(g), n)
 
+Base.vec(g::GaussNP) = [g.theta1;g.theta2[:]]
+Base.vec(g::GaussMP) = [g.mu1;g.mu2[:]]
+
 ###################
 ## Safe operators #
 ###################
 
 +(g1::GaussNP, g2::GaussNP) =
-    GaussianNatParam(g1.theta1+g2.theta1, g1.theta2+g2.theta2)
+    GaussianNatParam(vec(g1)+vec(g2), length(g1))
 +(g1::GaussMP, g2::GaussMP) =
-    GaussianMeanParam(g1.mu1+g2.mu1, g1.mu2+g2.mu2)
+    GaussianMeanParam(vec(g1)+vec(g2), length(g1))
 
-*(a::Float, g::GaussNP) = GaussianNatParam(a*g1.theta1, a*g1.theta2)
-*(a::Float, g::GaussMP) = GaussianMeanParam(a*g1.mu1,   a*g1.mu2)
+*(a::Float, g::GaussNP) = GaussianNatParam(a*vec(g), length(g))
+*(a::Float, g::GaussMP) = GaussianMeanParam(a*vec(g), length(g))
 *(g::Gauss, a::Float)   = *(a,g)
 /(a::Float, g::Gauss)   = *(1.0/a,g)
 /(g::Gauss, a::Float)   = /(a,g)
@@ -130,8 +144,17 @@ Base.rand(g::GaussMP, n::Int=1) =
 #####################
 
 -(g1::GaussNP, g2::GaussNP) =
-    GaussianNatParam(g1.theta1-g2.theta1, g1.theta2-g2.theta2)
+    GaussianNatParam(vec(g1)-vec(g2), length(g1))
 -(g1::GaussMP, g2::GaussMP) =
-    GaussianMeanParam(g1.mu1-g2.mu1, g1.mu2-g2.mu2)
+    GaussianMeanParam(vec(g1)-vec(g2), length(g1))
 
-#-{T<:GaussianNatParam}(g1::GaussNP)
+#########################
+## Comparison operators #
+#########################
+
+Base.norm(g::Gauss) = norm(vec(g))
+
+function Base.isapprox(g1::Gauss, g2::Gauss;
+                       rtol::Real=sqrt(eps()), atol::Real=0)
+    norm(g1-g2) <= atol + rtol*max(norm(g1), norm(g2))
+end
