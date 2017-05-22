@@ -10,10 +10,11 @@ using Compat
 const Float = (Int==Int64) ? Float64 : Float32
 
 export
+    # conversion
     natparam,
     meanparam
 
-import Base.+, Base.-
+import Base.+, Base.-, Base.*, Base./, Base.-
 
 include("models/gaussian.jl")
 
