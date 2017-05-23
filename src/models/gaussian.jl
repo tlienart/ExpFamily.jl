@@ -9,8 +9,8 @@ export
 ################################
 
 immutable GaussianNatParam <: NatParam
-    theta1::Vector{Float} # prec * mu
-    theta2::Symmetric{Float, Matrix{Float}} # -prec
+    theta1::Vector{Float}                   # precision * mu
+    theta2::Symmetric{Float, Matrix{Float}} # -precision
 end
 
 #####################################
@@ -18,8 +18,8 @@ end
 #####################################
 
 immutable DiagGaussianNatParam <: NatParam
-    theta1::Vector{Float} # prec*mu
-    theta2::Vector{Float} # diag(-prec)
+    theta1::Vector{Float}  # precision*mean
+    theta2::Vector{Float}  # -precision (diagonal)
     function DiagGaussianNatParam(t1::Vector{Float}, t2::Vector{Float},
                                   check::Bool=false)
         (check && any(t2.>0.0)) ? throw(DomainError()) : nothing
@@ -32,8 +32,8 @@ end
 #############################
 
 immutable GaussianMeanParam <: MeanParam
-    mu1::Vector{Float} # mu
-    mu2::Symmetric{Float, Matrix{Float}} # (mu*mu' + cov)/2
+    mu1::Vector{Float}                   # mean
+    mu2::Symmetric{Float, Matrix{Float}} # (mean*mean^T + covariance)/2
 end
 
 ##################################
@@ -41,8 +41,8 @@ end
 ##################################
 
 immutable DiagGaussianMeanParam <: MeanParam
-    mu1::Vector{Float}
-    mu2::Vector{Float}
+    mu1::Vector{Float}  # mean
+    mu2::Vector{Float}  # (mean^2 + variance)/2 (diagonal)
     function DiagGaussianMeanParam(m1::Vector{Float}, m2::Vector{Float},
                                   check::Bool=false)
         (check && any(2m2-m1.^2 .< 0.0)) ? throw(DomainError()) : nothing

@@ -145,9 +145,15 @@ function project(g::GaussMP; minmu::Float=-Inf, maxmu::Float=Inf,
     GaussianMeanParam(mean=mthresh, cov=V*Diagonal(Dthresh)*V')
 end
 
-# function project(x::DGaussMP; minmu=-Inf, maxmu=Inf,
-#                  minvar=0, maxvar=Inf)::DGaussMP
-#     mm = max.(minmu,  min.(maxmu,  mean(x)))
-#     vv = max.(minvar, min.(maxvar, var(x)))
-#     DiagGaussianMeanParam(mean=mm, cov=vv)
-# end
+function project(g::DGaussNP; minmu=-Inf, maxmu=Inf,
+                 minvar=0, maxvar=Inf)::DGaussNP
+    mthresh = max.(minmu,  min.(maxmu,  mean(g)))
+    pthresh = max(1.0./maxvar, min.(1.0./minvar, -g.theta2))
+    DiagGaussianNatParam(pthresh.*mthresh, -pthresh)
+end
+function project(g::DGaussMP; minmu=-Inf, maxmu=Inf,
+                 minvar=0, maxvar=Inf)::DGaussMP
+    mthresh = max.(minmu,  min.(maxmu,  mean(g)))
+    vthresh = max.(minvar, min.(maxvar, var(g)))
+    DiagGaussianMeanParam(mean=mthresh, cov=vthresh)
+end

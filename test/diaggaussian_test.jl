@@ -115,3 +115,17 @@ dgMP2= suffstats(DiagGaussianMeanParam, x)
 @test isapprox(dgMP.mu2, x.^2/2)
 @test isapprox(gMP2, gMP)
 @test isapprox(dgMP2, dgMP)
+
+nP = -[1.5;1e7]
+m  = [1.0;-0.5]
+lm = 1e-6
+
+dgNPproj = project(DiagGaussianNatParam(-nP.*m, nP), minvar=lm)
+dgMPproj = project(DiagGaussianMeanParam(mean=m, cov=-1.0./nP), minvar=lm)
+
+nPthresh = -[1.5; 1./lm]
+
+@test isapprox(dgNPproj.theta1, -nPthresh.*m)
+@test isapprox(dgNPproj.theta2, -[1.5; 1./lm])
+@test isapprox(dgMPproj.mu1, m)
+@test isapprox(cov(dgMPproj), [1./1.5; lm])

@@ -103,7 +103,6 @@ nP = -diagm([1.5, 1e7])
 m  = [1.0;-0.5]
 lm = 1e-6
 
-
 gNPproj = project(GaussianNatParam(-nP*m, nP), minvar=lm)
 gMPproj = project(GaussianMeanParam(mean=m, cov=inv(-nP)), minvar=lm)
 
