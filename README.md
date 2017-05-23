@@ -9,3 +9,4 @@ ExpFamily.jl is a package designed to provide efficient manipulation of objects 
 Requirements:
 
 * Julia >= 0.5
+* 64bit architecture (`Int==Int64`)
