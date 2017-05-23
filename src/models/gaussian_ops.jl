@@ -81,7 +81,7 @@ Base.vec(g::DGaussMP) = [g.mu1;g.mu2]
     GaussianNatParam(vec(g1)+vec(g2), length(g1))
 +(g1::GaussMP, g2::GaussMP) =
     GaussianMeanParam(vec(g1)+vec(g2), length(g1))
-+(g1::DGaussNP, g2::DGaussMP) =
++(g1::DGaussNP, g2::DGaussNP) =
     DiagGaussianNatParam(vec(g1)+vec(g2), length(g1))
 +(g1::DGaussMP, g2::DGaussMP) =
     DiagGaussianMeanParam(vec(g1)+vec(g2), length(g1))

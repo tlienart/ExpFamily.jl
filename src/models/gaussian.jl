@@ -74,7 +74,8 @@ function GaussianNatParam(;mean::Vector{Float}=[0.0],
     P = inv(cov)
     GaussianNatParam(P*mean, -P, check)
 end
-function GaussianNatParam(theta::Vector{Float}, d::Int, check::Bool=false)::GaussNP
+function GaussianNatParam(theta::Vector{Float}, d::Int,
+                          check::Bool=false)::GaussNP
     @assert length(theta)==d+d^2 "inconsistent dimensions"
     GaussianNatParam(theta[1:d], reshape(theta[d+1:end],d,d), check)
 end
@@ -88,7 +89,7 @@ function DiagGaussianNatParam(;mean::Vector{Float}=[0.0],
 end
 function DiagGaussianNatParam(theta::Vector{Float}, d::Int,
                               check::Bool=false)::DGaussNP
-    @assert length(theta==2d) "inconsistent dimensions"
+    @assert length(theta)==2d "inconsistent dimensions"
     DiagGaussianNatParam(theta[1:d], theta[d+1:end], check)
 end
 
