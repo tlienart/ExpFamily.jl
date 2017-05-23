@@ -1,5 +1,3 @@
-export suffstats
-
 ###############
 ## Conversion # (assumes input isvalid)
 ###############
@@ -129,19 +127,27 @@ end
 ## Projection operator #
 ########################
 
-# function project(x::GaussianNatParam; minmu=-Inf, maxmu=Inf,
-#                  minvar=0, maxvar=Inf)::GaussNP
-#     (pp, U) = eig(-x.theta2)
-#     U, pp   = real(U), real(pp)
-#     mm      = U*(Diagonal(1.0./pp)*(U'*x.theta1))
-#     pp      = max.(1.0./ maxvar, min.(1.0./minvar,pp))
-#     mm      = max.(minmu, min.(maxmu,mm))
-#     prec    = U*Diagonal(pp)*U'
-#     GaussianNatParam(prec*mm, -prec)
-# end
-# function project(x::GaussianMeanParam; minmu=-Inf, maxmu=Inf,
-#                  minvar=0, maxvar=Inf)::GaussianMeanParam
-#     mm = max(minmu, min(maxmu,mean(x)))
-#     vv = max(minvar,min(maxvar,var(x)))
-#     GaussianMeanParam(mean=mm, cov=vv)
+function project(g::GaussNP; minmu::Float=-Inf, maxmu::Float=Inf,
+                 minvar::Float=0., maxvar::Float=Inf)::GaussNP
+    (D, V)  = eig(-g.theta2)
+    D, V    = real(D), real(V)
+    Dthresh = max.(1.0./ maxvar, min.(1.0./minvar, D))
+    mthresh = max.(minmu, min.(maxmu, mean(g)))
+    Pthresh = V*Diagonal(Dthresh)*V'
+    GaussianNatParam(Pthresh*mthresh, -Pthresh)
+end
+function project(g::GaussMP; minmu::Float=-Inf, maxmu::Float=Inf,
+                 minvar::Float=0., maxvar::Float=Inf)::GaussMP
+    (D,V)   = eig(cov(g))
+    D, V    = real(D), real(V)
+    Dthresh = max.(minvar, min.(maxvar, D))
+    mthresh = max.(minmu, min.(maxmu, mean(g)))
+    GaussianMeanParam(mean=mthresh, cov=V*Diagonal(Dthresh)*V')
+end
+
+# function project(x::DGaussMP; minmu=-Inf, maxmu=Inf,
+#                  minvar=0, maxvar=Inf)::DGaussMP
+#     mm = max.(minmu,  min.(maxmu,  mean(x)))
+#     vv = max.(minvar, min.(maxvar, var(x)))
+#     DiagGaussianMeanParam(mean=mm, cov=vv)
 # end

@@ -95,3 +95,21 @@ gMPtest = gMPa + gMPb - meanparam(gNPb)
 @test isapprox(2gMPa + gMPa*2 - 3gMPa, gMPa)
 @test isapprox(gNPa/2 + gNPa/2, gNPa)
 @test isapprox(gMPa/2 + gMPa/2, gMPa)
+
+gNP = GaussianNatParam(mean=m, cov=C)
+@test isapprox(project(gNP), gNP)
+
+nP = -diagm([1.5, 1e7])
+m  = [1.0;-0.5]
+lm = 1e-6
+
+
+gNPproj = project(GaussianNatParam(-nP*m, nP), minvar=lm)
+gMPproj = project(GaussianMeanParam(mean=m, cov=inv(-nP)), minvar=lm)
+
+nPthresh = -diagm([1.5, 1./lm])
+
+@test isapprox(gNPproj.theta1, -nPthresh*m)
+@test isapprox(gNPproj.theta2, -diagm([1.5, 1./lm]))
+@test isapprox(gMPproj.mu1, m)
+@test isapprox(cov(gMPproj), diagm([1./1.5, lm]))

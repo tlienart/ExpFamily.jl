@@ -10,9 +10,10 @@ using Compat
 const Float = Float64
 
 export
-    # conversion
     natparam,
-    meanparam
+    meanparam,
+    suffstats,
+    project
 
 import Base.+, Base.-, Base.*, Base./, Base.-
 
