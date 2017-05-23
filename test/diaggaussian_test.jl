@@ -101,3 +101,13 @@ dgMPtest = dgMPa + dgMPb - meanparam(dgNPb)
 @test isapprox(2dgMPa + dgMPa*2 - 3dgMPa, dgMPa)
 @test isapprox(dgNPa/2 + dgNPa/2, dgNPa)
 @test isapprox(dgMPa/2 + dgMPa/2, dgMPa)
+
+x = randn(10)
+
+gMP  = suffstats(GaussianNatParam, x)
+dgMP = suffstats(DiagGaussianNatParam, x)
+
+@test isapprox(gMP.mu1, x)
+@test isapprox(gMP.mu2, (x*x')/2)
+@test isapprox(dgMP.mu1, x)
+@test isapprox(dgMP.mu2, x.^2/2)

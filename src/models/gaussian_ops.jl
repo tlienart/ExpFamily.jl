@@ -1,3 +1,4 @@
+export suffstats
 
 ###############
 ## Conversion # (assumes input isvalid)
@@ -25,6 +26,11 @@ end
 Base.full(g::DGaussNP) = GaussianNatParam(g.theta1, diagm(g.theta2))
 Base.full(g::DGaussMP) = GaussianMeanParam(g.mu1, diagm(g.mu2))
 
+suffstats(::Type{GaussNP}, x::Vector{Float}) = GaussianMeanParam(x,(x*x')/2)
+suffstats(::Type{GaussMP}, x::Vector{Float}) = GaussianMeanParam(x,(x*x')/2)
+suffstats(::Type{DGaussNP},x::Vector{Float}) = DiagGaussianMeanParam(x,0.5x.^2)
+suffstats(::Type{DGaussMP},x::Vector{Float}) = DiagGaussianMeanParam(x,0.5x.^2)
+
 ##############################
 ## Operations extending base #
 ##############################
@@ -38,8 +44,8 @@ Base.cov(g::DGaussNP)  = -1./g.theta2
 Base.cov(g::GaussMP)   = 2g.mu2.data-g.mu1*g.mu1'
 Base.cov(g::DGaussMP)  = 2g.mu2-g.mu1.^2
 
-Base.var(g::Union{GaussNP, GaussMP})   = diag(cov(g))
-Base.var(g::Union{DGaussNP, DGaussMP}) = cov(g)
+Base.var(g::FGauss) = diag(cov(g))
+Base.var(g::DGauss) = cov(g)
 
 Base.std(g::Gauss) = sqrt(var(g))
 
@@ -65,7 +71,7 @@ Base.rand(g::GaussNP, n::Int=1) =
     repmat(mean(g),1,n)+chol(-g.theta2)\randn(length(g), n)
 Base.rand(g::GaussMP, n::Int=1) =
     repmat(mean(g),1,n)+chol(cov(g))*randn(length(g), n)
-Base.rand(g::Union{DGaussNP,DGaussMP}, n::Int=1) =
+Base.rand(g::Union{DGaussNP, DGaussMP}, n::Int=1) =
     repmat(mean(g),1,n)+repmat(std(g),1,n).*randn(length(g),n)
 
 Base.vec(g::GaussNP)  = [g.theta1;g.theta2[:]]
@@ -118,3 +124,24 @@ function Base.isapprox(g1::Gauss, g2::Gauss;
                        rtol::Real=sqrt(eps()), atol::Real=0)
     norm(g1-g2) <= atol + rtol*max(norm(g1), norm(g2))
 end
+
+########################
+## Projection operator #
+########################
+
+# function project(x::GaussianNatParam; minmu=-Inf, maxmu=Inf,
+#                  minvar=0, maxvar=Inf)::GaussNP
+#     (pp, U) = eig(-x.theta2)
+#     U, pp   = real(U), real(pp)
+#     mm      = U*(Diagonal(1.0./pp)*(U'*x.theta1))
+#     pp      = max.(1.0./ maxvar, min.(1.0./minvar,pp))
+#     mm      = max.(minmu, min.(maxmu,mm))
+#     prec    = U*Diagonal(pp)*U'
+#     GaussianNatParam(prec*mm, -prec)
+# end
+# function project(x::GaussianMeanParam; minmu=-Inf, maxmu=Inf,
+#                  minvar=0, maxvar=Inf)::GaussianMeanParam
+#     mm = max(minmu, min(maxmu,mean(x)))
+#     vv = max(minvar,min(maxvar,var(x)))
+#     GaussianMeanParam(mean=mm, cov=vv)
+# end

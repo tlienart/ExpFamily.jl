@@ -56,6 +56,8 @@ const DGaussNP = DiagGaussianNatParam
 const GaussMP  = GaussianMeanParam
 const DGaussMP = DiagGaussianMeanParam
 const Gauss    = Union{GaussNP, DGaussNP, GaussMP, DGaussMP}
+const FGauss   = Union{GaussNP, GaussMP}
+const DGauss   = Union{DGaussNP, DGaussMP}
 
 ######################
 # Extra constructors
