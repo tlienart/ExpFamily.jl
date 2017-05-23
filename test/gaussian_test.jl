@@ -87,3 +87,8 @@ gMPtest = gMPa + gMPb - meanparam(gNPb)
 
 @test isapprox(GaussianNatParam(vec(gNPa),dim),gNPa)
 @test isapprox(GaussianMeanParam(vec(gMPa),dim),gMPa)
+
+@test isapprox(2*gNPa + gNPa*2 - 3*gNPa, gNPa)
+@test isapprox(2*gMPa + gMPa*2 - 3*gMPa, gMPa)
+@test isapprox(gNPa/2 + gNPa/2, gNPa)
+@test isapprox(gMPa/2 + gMPa/2, gMPa)

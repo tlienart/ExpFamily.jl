@@ -13,25 +13,27 @@ immutable GaussianNatParam <: NatParam
     theta2::Symmetric{Float, Matrix{Float}} # -prec
 end
 
-# immutable DiagGaussianNatParam <: NatParam
-#     theta1::Vector{Float} # prec*mu
-#     theta2::Vector{Float} # diag(-prec)
-# end
+immutable DiagGaussianNatParam <: NatParam
+    theta1::Vector{Float} # prec*mu
+    theta2::Vector{Float} # diag(-prec)
+end
 
 immutable GaussianMeanParam <: MeanParam
     mu1::Vector{Float} # mu
     mu2::Symmetric{Float, Matrix{Float}} # (mu*mu' + cov)/2
 end
 
-# immutable DiagGaussianMeanParam <: MeanParam
-#     mu1::Vector{Float}
-#     mu2::Vector{Float}
-# end
+immutable DiagGaussianMeanParam <: MeanParam
+    mu1::Vector{Float}
+    mu2::Vector{Float}
+end
 
 # Short types to simplify internal code
-const GaussNP = GaussianNatParam
-const GaussMP = GaussianMeanParam
-const Gauss   = Union{GaussNP, GaussMP}
+const GaussNP  = GaussianNatParam
+const DGaussNP = DiagGaussianNatParam
+const GaussMP  = GaussianMeanParam
+const DGaussMP = DiagGaussianMeanParam
+const Gauss    = Union{GaussNP, DGaussNP, GaussMP, DGaussMP}
 
 #################
 ## Constructors #
@@ -133,11 +135,11 @@ Base.vec(g::GaussMP) = [g.mu1;g.mu2[:]]
 +(g1::GaussMP, g2::GaussMP) =
     GaussianMeanParam(vec(g1)+vec(g2), length(g1))
 
-*(a::Float, g::GaussNP) = GaussianNatParam(a*vec(g), length(g))
-*(a::Float, g::GaussMP) = GaussianMeanParam(a*vec(g), length(g))
-*(g::Gauss, a::Float)   = *(a,g)
-/(a::Float, g::Gauss)   = *(1.0/a,g)
-/(g::Gauss, a::Float)   = /(a,g)
+*(a::Real,  g::GaussNP) = GaussianNatParam(a*vec(g), length(g))
+*(a::Real,  g::GaussMP) = GaussianMeanParam(a*vec(g), length(g))
+*(g::Gauss, a::Real)   = *(a,g)
+/(a::Real,  g::Gauss)   = *(1.0/a,g)
+/(g::Gauss, a::Real)   = /(a,g)
 
 #####################
 ## Unsafe operators # (result is not necessarily valid Gaussian)
