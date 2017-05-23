@@ -17,5 +17,6 @@ export
 import Base.+, Base.-, Base.*, Base./, Base.-
 
 include("models/gaussian.jl")
+include("models/gaussian_ops.jl")
 
 end # module

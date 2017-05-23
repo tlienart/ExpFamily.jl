@@ -23,14 +23,17 @@ npFromMP = natparam(gMP)
 
 @test isapprox(mpFromNP.mu1, gMP.mu1)
 @test isapprox(mpFromNP.mu2, gMP.mu2)
+@test isapprox(npFromMP.theta1, gNP.theta1)
+@test isapprox(npFromMP.theta2, gNP.theta2)
 
 @test isapprox(mean(gNP), m)
 @test isapprox(mean(gMP), m)
 @test isapprox(cov(gNP), C)
 @test isapprox(cov(gMP), C)
-
 @test isapprox(var(gMP), diag(C))
 @test isapprox(var(gNP), diag(C))
+@test isapprox(std(gMP), sqrt(diag(C)))
+@test isapprox(std(gNP), sqrt(diag(C)))
 
 @test_throws DomainError GaussianNatParam(mean=m,cov=-C,check=true)
 @test_throws DomainError GaussianMeanParam(mean=m,cov=-C,check=true)
