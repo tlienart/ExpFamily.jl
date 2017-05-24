@@ -145,7 +145,6 @@ function project(g::GaussMP; minmu::Float=-Inf, maxmu::Float=Inf,
     mthresh = max.(minmu, min.(maxmu, mean(g)))
     GaussianMeanParam(mean=mthresh, cov=V*Diagonal(Dthresh)*V')
 end
-
 function project(g::DGaussNP; minmu=-Inf, maxmu=Inf,
                  minvar=0, maxvar=Inf)::DGaussNP
     mthresh = max.(minmu,  min.(maxmu,  mean(g)))
@@ -158,3 +157,23 @@ function project(g::DGaussMP; minmu=-Inf, maxmu=Inf,
     vthresh = max.(minvar, min.(maxvar, var(g)))
     DiagGaussianMeanParam(mean=mthresh, cov=vthresh)
 end
+
+#################
+# loglikelihood #
+#################
+
+const log2pi        = log(2pi)
+const neghalflog2pi = -.5log2pi
+
+function loglikelihood(g::GaussNP, x::Vector{Float})::Float
+    precmu   = g.theta1
+    sqrtprec = chol(-g.theta2)
+    tmp      = sqrtprec'\precmu
+    sum(neghalflog2pi + log(diag(sqrtprec))) +
+        (dot(x',g.theta2*x) + 2dot(x,precmu) - dot(tmp,tmp))/2
+end
+
+# function loglikelihood(g::Gauss, X::Matrix{Float})::Vector{Float}
+#     # NOTE convention: p * N matrix
+#     [loglikelihood(g, X[:,i]) for i in 1:size(X,2)]
+# end

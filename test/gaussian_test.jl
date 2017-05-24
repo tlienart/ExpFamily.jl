@@ -114,3 +114,15 @@ nPthresh = -diagm([1.5, 1./lm])
 @test isapprox(gNPproj.theta2, -diagm([1.5, 1./lm]))
 @test isapprox(gMPproj.mu1, m)
 @test isapprox(cov(gMPproj), diagm([1./1.5, lm]))
+
+x = randn(dim)
+
+Ca = cov(gNPa)
+ma = mean(gNPa)
+l  = exp( -dot(x-ma, Ca\(x-ma)) / 2 )/sqrt( (2pi)^dim * det(Ca) )
+ll = log(l)
+
+@test isapprox( loglikelihood(gNPa, x), ll )
+
+# @test isapprox(loglikelihood(gNPa, x),
+#         log( exp( -dot(x-mean, cov(g)) ) ))

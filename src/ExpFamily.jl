@@ -14,7 +14,8 @@ export
     natparam,
     meanparam,
     suffstats,
-    project
+    project,
+    loglikelihood
 
 import Base.+, Base.-, Base.*, Base./, Base.-
 
