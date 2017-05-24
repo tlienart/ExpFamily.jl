@@ -32,7 +32,7 @@ npFromMP = natparam(dgMP)
 @test isapprox(mpFromNP.mu2, dgMP.mu2)
 @test isapprox(npFromMP.theta1, dgNP.theta1)
 @test isapprox(npFromMP.theta2, dgNP.theta2)
-@test isapprox(cov(mpFromNP2), 2*cov(mpFromNP))
+@test isapprox(cov(mpFromNP2), 2cov(mpFromNP))
 
 @test isapprox(mean(dgNP), m)
 @test isapprox(mean(dgMP), m)
