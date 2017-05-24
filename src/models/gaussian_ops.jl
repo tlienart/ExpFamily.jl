@@ -10,8 +10,9 @@ function natparam(g::DGaussMP)::DGaussNP
     P = 1./(2g.mu2-g.mu1.^2)
     DiagGaussianNatParam(P.*g.mu1, -P)
 end
-function meanparam(g::GaussNP)::GaussMP
-    cov = -inv(g.theta2)
+function meanparam(g::GaussNP, correction::Float=1.0)::GaussMP
+    # NOTE may want to use (N-P-2)/(N-1) if g.theta2 is noisy.
+    cov = -inv(g.theta2.data)*correction
     mu1 = cov * g.theta1
     GaussianMeanParam(mu1, (mu1*mu1' + cov)/2)
 end

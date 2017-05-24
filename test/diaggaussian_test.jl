@@ -24,13 +24,15 @@ gMP = full(dgMP)
 @test isvalid(dgNP)
 @test isvalid(dgMP)
 
-mpFromNP = meanparam(dgNP)
+mpFromNP  = meanparam(dgNP)
+mpFromNP2 = meanparam(dgNP, .5)
 npFromMP = natparam(dgMP)
 
 @test isapprox(mpFromNP.mu1, dgMP.mu1)
 @test isapprox(mpFromNP.mu2, dgMP.mu2)
 @test isapprox(npFromMP.theta1, dgNP.theta1)
 @test isapprox(npFromMP.theta2, dgNP.theta2)
+@test isapprox(cov(mpFromNP2), 2*cov(mpFromNP))
 
 @test isapprox(mean(dgNP), m)
 @test isapprox(mean(dgMP), m)
