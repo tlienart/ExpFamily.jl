@@ -4,8 +4,9 @@ using Compat
 
 # @compat abstract type EFam end
 
-@compat abstract type NatParam end
-@compat abstract type MeanParam end
+@compat abstract type EFamily end
+@compat abstract type NatParam  <: EFamily end
+@compat abstract type MeanParam <: EFamily end
 
 const Float = Float64
 

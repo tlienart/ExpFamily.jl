@@ -18,13 +18,15 @@ gMP = GaussianMeanParam(mean=m, cov=C)
 @test isvalid(gNP)
 @test isvalid(gMP)
 
-mpFromNP = meanparam(gNP)
-npFromMP = natparam(gMP)
+mpFromNP  = meanparam(gNP)
+mpFromNP2 = meanparam(gNP, 2.0)
+npFromMP  = natparam(gMP)
 
 @test isapprox(mpFromNP.mu1, gMP.mu1)
 @test isapprox(mpFromNP.mu2, gMP.mu2)
 @test isapprox(npFromMP.theta1, gNP.theta1)
 @test isapprox(npFromMP.theta2, gNP.theta2)
+@test isapprox(cov(mpFromNP2), 2cov(mpFromNP))
 
 @test isapprox(mean(gNP), m)
 @test isapprox(mean(gMP), m)
