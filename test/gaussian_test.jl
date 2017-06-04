@@ -122,6 +122,9 @@ ma = mean(gNPa)
 l  = exp( -dot(x-ma, Ca\(x-ma)) / 2 )/sqrt( (2pi)^dim * det(Ca) )
 ll = log(l)
 
-@test isapprox( loglikelihood(gNPa, x), ll )
-@test isapprox( loglikelihood(gNPa, x),
-                loglikelihood(gMPa, x) )
+@test isapprox( loglik(gNPa, x), ll )
+@test isapprox( loglik(gNPa, x),
+                loglik(gMPa, x) )
+
+@test isapprox( gradloglik(gNPa, x), Ca\(ma-x) )
+@test isapprox( gradloglik(gMPa, x), gradloglik(gNPa, x) )

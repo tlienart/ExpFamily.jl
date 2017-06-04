@@ -137,5 +137,10 @@ ma = mean(dgNPa)
 l  = exp( -dot(x-ma, (x-ma)./Ca) / 2 )/sqrt( (2pi)^dim * prod(Ca) )
 ll = log(l)
 
-@test isapprox( loglikelihood(dgNPa, x), ll )
-@test isapprox( loglikelihood(dgMPa, x), ll )
+gNPa = GaussianNatParam(mean=ma, cov=diagm(Ca))
+
+@test isapprox( loglik(dgNPa, x), ll )
+@test isapprox( loglik(dgMPa, x), ll )
+
+@test isapprox( gradloglik(dgNPa, x),  gradloglik(gNPa, x) )
+@test isapprox( gradloglik(dgMPa, x), gradloglik(dgNPa, x) )

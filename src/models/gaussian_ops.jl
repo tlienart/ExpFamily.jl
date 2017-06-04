@@ -158,67 +158,46 @@ function project(g::DGaussMP; minmu=-Inf, maxmu=Inf,
     DiagGaussianMeanParam(mean=mthresh, cov=vthresh)
 end
 
-##################
-## loglikelihood
-##################
+#############################################
+## loglik, gradient of loglik
+#############################################
 
 const neghalflog2pi = -.5log(2pi)
 
-function loglikelihood(g::GaussNP, x::Vector{Float})::Float
+function loglik(g::GaussNP, x::Vector{Float})::Float
     precmu   = g.theta1
     sqrtprec = chol(-g.theta2)
     tmp      = sqrtprec'\precmu
     sum(neghalflog2pi + log.(diag(sqrtprec))) +
         ( dot(x,g.theta2*x) + 2dot(x,precmu) - norm(tmp)^2 )/2
 end
-function loglikelihood(g::DGaussNP, x::Vector{Float})::Float
+function loglik(g::DGaussNP, x::Vector{Float})::Float
     precmu   = g.theta1
     sqrtprec = sqrt.(-g.theta2)
     tmp      = precmu./sqrtprec
     sum(neghalflog2pi + log.(sqrtprec)) +
         ( dot(x, g.theta2 .* x ) + 2dot(x,precmu) - norm(tmp)^2 )/2
 end
-function loglikelihood(g::GaussMP, x::Vector{Float})::Float
+function loglik(g::GaussMP, x::Vector{Float})::Float
     sqrtcov = chol(cov(g))
     delta   = sqrtcov'\(x-g.mu1)
     sum(neghalflog2pi - log.(diag(sqrtcov))) - norm(delta)^2/2
 end
-function loglikelihood(g::DGaussMP, x::Vector{Float})::Float
+function loglik(g::DGaussMP, x::Vector{Float})::Float
     stds  = std(g)
     delta = (x-g.mu1)./stds
     sum(neghalflog2pi - log.(stds)) - norm(delta)^2/2
 end
 
-### DIAG
-
-# function ExpFamily.loglikelihood(g::MeanParam,x::Vector{Float64})
-#     const log2pi = log(2.0*pi)
-#     vv = cov(g)
-#     cc = chol(vv)
-#     mu = g.mu
-#     delta = cc'\(x-mu)
-#     .5*sum(-log2pi - log(diag(cc)) - delta'*delta)
-# end
-#
-# function AbstractGaussian.gradloglik(g::NatParam,x::Vector{Float64})
-#     g.muPrec + g.negPrec*x
-# end
-
-
-# function ExpFamily.loglikelihood(g::NatParam,x::Array{Float64})
-#   const log2pi = log(2*pi)
-#   prec = -g.negPrec
-#   mu = g.muPrec./prec
-#   .5*sum(-log2pi + log(prec)) -.5*sum(prec.*(x-mu).*(x-mu))
-# end
-#
-# function ExpFamily.loglikelihood(g::MeanParam,x::Array{Float64})
-#   const log2pi = log(2*pi)
-#   v = var(g)
-#   mu = g.mu
-#   -.5*sum(-log2pi - log(v) + (x-mu).*(x-mu)./v)
-# end
-#
-# function AbstractGaussian.gradloglik(g::NatParam,x::Vector{Float64})
-#   g.muPrec + g.negPrec.*x
-# end
+function gradloglik(g::GaussNP, x::Vector{Float})::Vector{Float}
+    g.theta1 + g.theta2*x
+end
+function gradloglik(g::DGaussNP, x::Vector{Float})::Vector{Float}
+    g.theta1 + g.theta2 .* x
+end
+function gradloglik(g::GaussMP, x::Vector{Float})::Vector{Float}
+    cov(g)\(g.mu1 - x)
+end
+function gradloglik(g::DGaussMP, x::Vector{Float})::Vector{Float}
+    (g.mu1 - x)./cov(g)
+end

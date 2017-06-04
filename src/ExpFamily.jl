@@ -15,7 +15,8 @@ export
     meanparam,
     suffstats,
     project,
-    loglikelihood
+    loglik,
+    gradloglik
 
 import Base.+, Base.-, Base.*, Base./, Base.-
 
