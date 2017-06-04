@@ -162,8 +162,7 @@ end
 ## loglikelihood
 ##################
 
-const log2pi        = log(2pi)
-const neghalflog2pi = -.5log2pi
+const neghalflog2pi = -.5log(2pi)
 
 function loglikelihood(g::GaussNP, x::Vector{Float})::Float
     precmu   = g.theta1
@@ -171,6 +170,13 @@ function loglikelihood(g::GaussNP, x::Vector{Float})::Float
     tmp      = sqrtprec'\precmu
     sum(neghalflog2pi + log.(diag(sqrtprec))) +
         ( dot(x,g.theta2*x) + 2dot(x,precmu) - norm(tmp)^2 )/2
+end
+function loglikelihood(g::DGaussNP, x::Vector{Float})::Float
+    precmu   = g.theta1
+    sqrtprec = sqrt.(-g.theta2)
+    tmp      = precmu./sqrtprec
+    sum(neghalflog2pi + log.(sqrtprec)) +
+        ( dot(x, g.theta2 .* x ) + 2dot(x,precmu) - norm(tmp)^2 )/2
 end
 function loglikelihood(g::GaussMP, x::Vector{Float})::Float
     sqrtcov = chol(cov(g))
