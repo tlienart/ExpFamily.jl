@@ -123,6 +123,5 @@ l  = exp( -dot(x-ma, Ca\(x-ma)) / 2 )/sqrt( (2pi)^dim * det(Ca) )
 ll = log(l)
 
 @test isapprox( loglikelihood(gNPa, x), ll )
-
-# @test isapprox(loglikelihood(gNPa, x),
-#         log( exp( -dot(x-mean, cov(g)) ) ))
+@test isapprox( loglikelihood(gNPa, x),
+                loglikelihood(gMPa, x) )

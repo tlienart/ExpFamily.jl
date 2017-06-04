@@ -1,6 +1,6 @@
-###############
-## Conversion # (assumes input isvalid)
-###############
+#######################################
+## Conversion (assumes input isvalid)
+#######################################
 
 function natparam(g::GaussMP)::GaussNP
     P = inv(Symmetric(2g.mu2.data-g.mu1*g.mu1'))
@@ -11,7 +11,8 @@ function natparam(g::DGaussMP)::DGaussNP
     DiagGaussianNatParam(P.*g.mu1, -P)
 end
 function meanparam(g::GaussNP, correction::Float=1.0)::GaussMP
-    # NOTE may want to use (N-P-2)/(N-1) if g.theta2 is noisy.
+    # NOTE correction -> may want to use (N-P-2)/(N-1) if g.theta2 is noisy,
+    # NOTE see litt for estimation of precision matrix.
     cov = -inv(g.theta2.data)*correction
     mu1 = cov * g.theta1
     GaussianMeanParam(mu1, (mu1*mu1' + cov)/2)
@@ -31,22 +32,20 @@ suffstats(::Type{DGaussNP},x::Vector{Float}) = DiagGaussianMeanParam(x,0.5x.^2)
 suffstats(::Type{DGaussMP},x::Vector{Float}) = DiagGaussianMeanParam(x,0.5x.^2)
 
 ##############################
-## Operations extending base #
+## Operations extending base
 ##############################
 
 Base.mean(g::GaussNP)  = -g.theta2\g.theta1
 Base.mean(g::DGaussNP) = -g.theta1./g.theta2
 Base.mean(g::GaussMP)  = g.mu1
 Base.mean(g::DGaussMP) = g.mu1
-Base.cov(g::GaussNP)   = -inv(g.theta2)
-Base.cov(g::DGaussNP)  = -1./g.theta2
-Base.cov(g::GaussMP)   = 2g.mu2.data-g.mu1*g.mu1'
-Base.cov(g::DGaussMP)  = 2g.mu2-g.mu1.^2
-
-Base.var(g::FGauss) = diag(cov(g))
-Base.var(g::DGauss) = cov(g)
-
-Base.std(g::Gauss) = sqrt.(var(g))
+Base.cov(g ::GaussNP)  = -inv(g.theta2)
+Base.cov(g ::DGaussNP) = -1./g.theta2
+Base.cov(g ::GaussMP)  = 2g.mu2.data-g.mu1*g.mu1'
+Base.cov(g ::DGaussMP) = 2g.mu2-g.mu1.^2
+Base.var(g ::FGauss)   = diag(cov(g))
+Base.var(g ::DGauss)   = cov(g)
+Base.std(g ::Gauss)    = sqrt.(var(g))
 
 Base.isvalid(g::GaussNP)  = isposdef(-g.theta2.data)
 Base.isvalid(g::DGaussNP) = all(-g.theta2 .> 0)
@@ -61,7 +60,8 @@ Base.ones(::Type{GaussMP}, d::Int) =
     GaussianMeanParam(mean=zeros(d), cov=eye(d))
 Base.ones(::Type{DGaussMP}, d::Int) =
     DiagGaussianMeanParam(mean=zeros(d), cov=ones(d))
-# NOTE zeros does not really make sense
+# NOTE zeros does not really make sense, just use a one with variance
+# NOTE to infinity or to zero based on use case
 
 Base.length(g::Union{GaussNP, DGaussNP}) = length(g.theta1)
 Base.length(g::Union{GaussMP, DGaussMP}) = length(g.mu1)
@@ -79,7 +79,7 @@ Base.vec(g::GaussMP)  = [g.mu1;g.mu2[:]]
 Base.vec(g::DGaussMP) = [g.mu1;g.mu2]
 
 ###################
-## Safe operators #
+## Safe operators
 ###################
 
 +(g1::GaussNP, g2::GaussNP) =
@@ -101,7 +101,7 @@ Base.vec(g::DGaussMP) = [g.mu1;g.mu2]
 /(g::Gauss, a::Real)   = /(a,g)
 
 #####################
-## Unsafe operators # (result is not necessarily valid Gaussian)
+## Unsafe operators (NOTE result is not necessarily valid Gaussian)
 #####################
 
 -(g1::GaussNP, g2::GaussNP) =
@@ -114,7 +114,7 @@ Base.vec(g::DGaussMP) = [g.mu1;g.mu2]
     DiagGaussianMeanParam(vec(g1)-vec(g2), length(g1))
 
 #########################
-## Comparison operators #
+## Comparison operators
 #########################
 
 Base.norm(g::Gauss) = norm(vec(g))
@@ -125,7 +125,7 @@ function Base.isapprox(g1::Gauss, g2::Gauss;
 end
 
 ########################
-## Projection operator #
+## Projection operator
 ########################
 
 function project(g::GaussNP; minmu::Float=-Inf, maxmu::Float=Inf,
@@ -158,9 +158,9 @@ function project(g::DGaussMP; minmu=-Inf, maxmu=Inf,
     DiagGaussianMeanParam(mean=mthresh, cov=vthresh)
 end
 
-#################
-# loglikelihood #
-#################
+##################
+## loglikelihood
+##################
 
 const log2pi        = log(2pi)
 const neghalflog2pi = -.5log2pi
@@ -170,10 +170,44 @@ function loglikelihood(g::GaussNP, x::Vector{Float})::Float
     sqrtprec = chol(-g.theta2)
     tmp      = sqrtprec'\precmu
     sum(neghalflog2pi + log.(diag(sqrtprec))) +
-        (dot(x,g.theta2*x) + 2dot(x,precmu) - dot(tmp,tmp))/2
+        ( dot(x,g.theta2*x) + 2dot(x,precmu) - norm(tmp)^2 )/2
+end
+function loglikelihood(g::GaussMP, x::Vector{Float})::Float
+    sqrtcov = chol(cov(g))
+    delta   = sqrtcov'\(x-g.mu1)
+    sum(neghalflog2pi - log.(diag(sqrtcov))) - norm(delta)^2/2
 end
 
-# function loglikelihood(g::Gauss, X::Matrix{Float})::Vector{Float}
-#     # NOTE convention: p * N matrix
-#     [loglikelihood(g, X[:,i]) for i in 1:size(X,2)]
+### DIAG
+
+# function ExpFamily.loglikelihood(g::MeanParam,x::Vector{Float64})
+#     const log2pi = log(2.0*pi)
+#     vv = cov(g)
+#     cc = chol(vv)
+#     mu = g.mu
+#     delta = cc'\(x-mu)
+#     .5*sum(-log2pi - log(diag(cc)) - delta'*delta)
+# end
+#
+# function AbstractGaussian.gradloglik(g::NatParam,x::Vector{Float64})
+#     g.muPrec + g.negPrec*x
+# end
+
+
+# function ExpFamily.loglikelihood(g::NatParam,x::Array{Float64})
+#   const log2pi = log(2*pi)
+#   prec = -g.negPrec
+#   mu = g.muPrec./prec
+#   .5*sum(-log2pi + log(prec)) -.5*sum(prec.*(x-mu).*(x-mu))
+# end
+#
+# function ExpFamily.loglikelihood(g::MeanParam,x::Array{Float64})
+#   const log2pi = log(2*pi)
+#   v = var(g)
+#   mu = g.mu
+#   -.5*sum(-log2pi - log(v) + (x-mu).*(x-mu)./v)
+# end
+#
+# function AbstractGaussian.gradloglik(g::NatParam,x::Vector{Float64})
+#   g.muPrec + g.negPrec.*x
 # end
