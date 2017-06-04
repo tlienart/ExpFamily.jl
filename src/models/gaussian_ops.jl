@@ -46,7 +46,7 @@ Base.cov(g::DGaussMP)  = 2g.mu2-g.mu1.^2
 Base.var(g::FGauss) = diag(cov(g))
 Base.var(g::DGauss) = cov(g)
 
-Base.std(g::Gauss) = sqrt(var(g))
+Base.std(g::Gauss) = sqrt.(var(g))
 
 Base.isvalid(g::GaussNP)  = isposdef(-g.theta2.data)
 Base.isvalid(g::DGaussNP) = all(-g.theta2 .> 0)
@@ -148,7 +148,7 @@ end
 function project(g::DGaussNP; minmu=-Inf, maxmu=Inf,
                  minvar=0, maxvar=Inf)::DGaussNP
     mthresh = max.(minmu,  min.(maxmu,  mean(g)))
-    pthresh = max(1.0./maxvar, min.(1.0./minvar, -g.theta2))
+    pthresh = max.(1.0./maxvar, min.(1.0./minvar, -g.theta2))
     DiagGaussianNatParam(pthresh.*mthresh, -pthresh)
 end
 function project(g::DGaussMP; minmu=-Inf, maxmu=Inf,
@@ -169,8 +169,8 @@ function loglikelihood(g::GaussNP, x::Vector{Float})::Float
     precmu   = g.theta1
     sqrtprec = chol(-g.theta2)
     tmp      = sqrtprec'\precmu
-    sum(neghalflog2pi + log(diag(sqrtprec))) +
-        (dot(x',g.theta2*x) + 2dot(x,precmu) - dot(tmp,tmp))/2
+    sum(neghalflog2pi + log.(diag(sqrtprec))) +
+        (dot(x,g.theta2*x) + 2dot(x,precmu) - dot(tmp,tmp))/2
 end
 
 # function loglikelihood(g::Gauss, X::Matrix{Float})::Vector{Float}
