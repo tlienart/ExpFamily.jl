@@ -138,3 +138,4 @@ l  = exp( -dot(x-ma, (x-ma)./Ca) / 2 )/sqrt( (2pi)^dim * prod(Ca) )
 ll = log(l)
 
 @test isapprox( loglikelihood(dgNPa, x), ll )
+@test isapprox( loglikelihood(dgMPa, x), ll )

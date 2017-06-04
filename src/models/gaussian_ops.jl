@@ -183,6 +183,11 @@ function loglikelihood(g::GaussMP, x::Vector{Float})::Float
     delta   = sqrtcov'\(x-g.mu1)
     sum(neghalflog2pi - log.(diag(sqrtcov))) - norm(delta)^2/2
 end
+function loglikelihood(g::DGaussMP, x::Vector{Float})::Float
+    stds  = std(g)
+    delta = (x-g.mu1)./stds
+    sum(neghalflog2pi - log.(stds)) - norm(delta)^2/2
+end
 
 ### DIAG
 
