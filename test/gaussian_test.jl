@@ -115,14 +115,23 @@ nPthresh = -diagm([1.5, 1./lm])
 @test isapprox(gMPproj.mu1, m)
 @test isapprox(cov(gMPproj), diagm([1./1.5, lm]))
 
-x = randn(dim)
+x  = randn(dim)
+ns = 5
+xb = randn(dim,ns)
 
 Ca = cov(gNPa)
 ma = mean(gNPa)
 l  = exp( -dot(x-ma, Ca\(x-ma)) / 2 )/sqrt( (2pi)^dim * det(Ca) )
 ll = log(l)
 
+lb  = [exp( -dot(xb[:,i]-ma, Ca\(xb[:,i]-ma))/2) for i in 1:ns]
+lb /= sqrt( (2pi)^dim * det(Ca) )
+llb = log.(lb)
+
 @test isapprox( loglik(gNPa, x), ll )
+
+@test isapprox( loglik(gNPa, xb), llb )
+
 @test isapprox( loglik(gNPa, x),
                 loglik(gMPa, x) )
 

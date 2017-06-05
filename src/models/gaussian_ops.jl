@@ -164,14 +164,33 @@ end
 
 const neghalflog2pi = -.5log(2pi)
 
-function loglik(g::GaussNP, x::Vector{Float})::Float
+function loglik(g::GaussNP, x::AbstractArray{Float},
+                axis::Int=2)::Union{Float,Vector{Float}}
     precmu   = g.theta1
     sqrtprec = chol(-g.theta2)
     tmp      = sqrtprec'\precmu
-    sum(neghalflog2pi + log.(diag(sqrtprec))) +
-        ( dot(x,g.theta2*x) + 2dot(x,precmu) - norm(tmp)^2 )/2
+    __f(x)   = ( dot(x,g.theta2*x) + 2dot(x,precmu) )/2
+    result   = sum(neghalflog2pi + log.(diag(sqrtprec))) - norm(tmp)^2/2
+    if length(size(x))==1
+        # single vector
+        result += __f(x)
+    else
+        @assert axis in [1,2] "unknown axis index"
+        @assert size(x)[axis==2?1:2]==length(precmu) "dimensions don't match"
+        if axis == 1
+            # read by rows
+            result += [__f(x[i,:]) for i in 1:size(x)[1]]
+        else
+            # read by columns
+            result += [__f(x[:,i]) for i in 1:size(x)[2]]
+        end
+    end
+    result
 end
-function loglik(g::DGaussNP, x::Vector{Float})::Float
+function loglik(g::DGaussNP, x::AbstractArray{Float},
+                axis::Int=2)::Union{Float,Vector{Float}}
+    # XXX
+    # NOTE here, transforming from single input to multi input!
     precmu   = g.theta1
     sqrtprec = sqrt.(-g.theta2)
     tmp      = precmu./sqrtprec
