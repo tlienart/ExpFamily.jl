@@ -164,7 +164,7 @@ end
 
 const neghalflog2pi = -.5log(2pi)
 
-function loglik(g::GaussNP, x::AbstractArray{Float},
+function loglik(g::GaussNP, x::AbstractArray{Float};
                 axis::Int=2)::Union{Float,Vector{Float}}
     precmu   = g.theta1
     sqrtprec = chol(-g.theta2)

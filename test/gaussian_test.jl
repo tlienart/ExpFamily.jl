@@ -131,6 +131,7 @@ llb = log.(lb)
 @test isapprox( loglik(gNPa, x), ll )
 
 @test isapprox( loglik(gNPa, xb), llb )
+@test isapprox( loglik(gNPa, xb), loglik(gNPa, xb', axis=1))
 
 @test isapprox( loglik(gNPa, x),
                 loglik(gMPa, x) )
