@@ -11,6 +11,7 @@ using Compat
 const Float = Float64
 
 export
+    EFamily,
     natparam,
     meanparam,
     suffstats,
