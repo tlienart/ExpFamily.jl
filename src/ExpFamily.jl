@@ -8,6 +8,8 @@ using Compat
 @compat abstract type NatParam  <: EFamily end
 @compat abstract type MeanParam <: EFamily end
 
+@compat abstract type SuffStats end
+
 const Float = Float64
 
 export
@@ -23,5 +25,6 @@ import Base.+, Base.-, Base.*, Base./, Base.-
 
 include("models/gaussian.jl")
 include("models/gaussian_ops.jl")
+include("models/gaussian_suffstats.jl")
 
 end # module

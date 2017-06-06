@@ -105,18 +105,18 @@ dgMPtest = dgMPa + dgMPb - meanparam(dgNPb)
 x = randn(10)
 
 ssNP  = suffstats(GaussianNatParam, x)
-ssMP  = suffstats(GaussianMeanParam,x)
+ssMP  = suffstats(GaussianMeanParam, x)
 ssdNP = suffstats(DiagGaussianNatParam, x)
 ssdMP = suffstats(DiagGaussianMeanParam, x)
 
-@test isapprox(ssNP[1], x)
-@test isapprox(ssMP[2], (x*x')/2)
-@test isapprox(ssMP[1], x)
-@test isapprox(ssMP[2], (x*x')/2)
-@test isapprox(ssdNP[1], x)
-@test isapprox(ssdNP[2], (x.^2)/2)
-@test isapprox(ssdMP[1], x)
-@test isapprox(ssdMP[2], (x.^2)/2)
+@test isapprox(ssNP.ss[1], x)
+@test isapprox(ssMP.ss[2], (x*x')/2)
+@test isapprox(ssMP.ss[1], x)
+@test isapprox(ssMP.ss[2], (x*x')/2)
+@test isapprox(ssdNP.ss[1], x)
+@test isapprox(ssdNP.ss[2], (x.^2)/2)
+@test isapprox(ssdMP.ss[1], x)
+@test isapprox(ssdMP.ss[2], (x.^2)/2)
 
 nP = -[1.5;1e7]
 m  = [1.0;-0.5]

@@ -26,11 +26,6 @@ end
 Base.full(g::DGaussNP) = GaussianNatParam(g.theta1, diagm(g.theta2))
 Base.full(g::DGaussMP) = GaussianMeanParam(g.mu1, diagm(g.mu2))
 
-suffstats(::Type{GaussNP}, x::Vector{Float}) = (x, (x*x')/2)
-suffstats(::Type{GaussMP}, x::Vector{Float}) = (x, (x*x')/2)
-suffstats(::Type{DGaussNP},x::Vector{Float}) = (x, (x.^2)/2)
-suffstats(::Type{DGaussMP},x::Vector{Float}) = (x, (x.^2)/2)
-
 ##############################
 ## Operations extending base
 ##############################
