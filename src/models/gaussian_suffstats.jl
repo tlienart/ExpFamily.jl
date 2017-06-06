@@ -37,6 +37,6 @@ suffstats(::Type{DGaussMP},x::Vector{Float})=DiagGaussianSuffStats(x, 0.5x.^2)
 +(sa::DGaussSS, sb::DGaussSS) = DiagGaussianSuffStats(sa[1]+sb[1], sa[2]+sb[2])
 
 *(a::Real, s::FGaussSS) = GaussianSuffStats(a * s[1], a * s[2].data)
-*(a::Real, s::DGaussSS) = DiagGaussianSuffStats(a * s[1], a * s[2].data)
+*(a::Real, s::DGaussSS) = DiagGaussianSuffStats(a * s[1], a * s[2])
 
 *(s::GaussSS, a::Real) = a * s
