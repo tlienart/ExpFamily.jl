@@ -18,3 +18,7 @@ Requirements:
 ## Conventions
 
 Matrices are `p x N` with `p` the dimensions and `N` the number of points (in particular `rand`, `loglikelihood`)
+
+## Remarks
+
+* The gaussian objects require the covariance to be symmetric but not positive definite this is because in some cases (e.g. in EP) it may be desirable to have an object which looks like a Gaussian but is not a valid one (e.g.: cavity distribution)
