@@ -21,7 +21,7 @@ export
     loglik,
     gradloglik
 
-import Base.+, Base.-, Base.*, Base./, Base.-
+import Base.+, Base.-, Base.*, Base./, Base.-, Base.getindex
 
 include("models/gaussian.jl")
 include("models/gaussian_ops.jl")

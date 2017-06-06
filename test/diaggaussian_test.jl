@@ -108,15 +108,17 @@ ssNP  = suffstats(GaussianNatParam, x)
 ssMP  = suffstats(GaussianMeanParam, x)
 ssdNP = suffstats(DiagGaussianNatParam, x)
 ssdMP = suffstats(DiagGaussianMeanParam, x)
+ssNP2 = 2*ssNP
 
-@test isapprox(ssNP.ss[1], x)
-@test isapprox(ssMP.ss[2], (x*x')/2)
-@test isapprox(ssMP.ss[1], x)
-@test isapprox(ssMP.ss[2], (x*x')/2)
-@test isapprox(ssdNP.ss[1], x)
-@test isapprox(ssdNP.ss[2], (x.^2)/2)
-@test isapprox(ssdMP.ss[1], x)
-@test isapprox(ssdMP.ss[2], (x.^2)/2)
+@test isapprox(ssNP[1], x)
+@test isapprox(ssMP[2], (x*x')/2)
+@test isapprox(ssMP[1], x)
+@test isapprox(ssMP[2], (x*x')/2)
+@test isapprox(ssdNP[1], x)
+@test isapprox(ssdNP[2], (x.^2)/2)
+@test isapprox(ssdMP[1], x)
+@test isapprox(ssdMP[2], (x.^2)/2)
+@test isapprox(ssNP2[1], 2x)
 
 nP = -[1.5;1e7]
 m  = [1.0;-0.5]
