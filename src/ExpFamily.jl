@@ -19,12 +19,14 @@ export
     suffstats,
     project,
     loglik,
+    uloglik,
     gradloglik
 
 import Base.+, Base.-, Base.*, Base./, Base.-, Base.getindex
 
 include("models/gaussian.jl")
 include("models/gaussian_ops.jl")
+include("models/gaussian_loglik.jl")
 include("models/gaussian_suffstats.jl")
 
 end # module

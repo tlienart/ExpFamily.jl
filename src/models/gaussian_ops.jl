@@ -127,7 +127,7 @@ function project(g::GaussNP; minmu::Float=-Inf, maxmu::Float=Inf,
                  minvar::Float=0., maxvar::Float=Inf)::GaussNP
     (D, V)  = eig(-g.theta2)
     D, V    = real(D), real(V)
-    Dthresh = max.(1.0./ maxvar, min.(1.0./minvar, D))
+    Dthresh = max.(1.0/maxvar, min.(1.0/minvar, D))
     mthresh = max.(minmu, min.(maxmu, mean(g)))
     Pthresh = V*Diagonal(Dthresh)*V'
     GaussianNatParam(Pthresh*mthresh, -Pthresh)
@@ -143,7 +143,7 @@ end
 function project(g::DGaussNP; minmu=-Inf, maxmu=Inf,
                  minvar=0, maxvar=Inf)::DGaussNP
     mthresh = max.(minmu,  min.(maxmu,  mean(g)))
-    pthresh = max.(1.0./maxvar, min.(1.0./minvar, -g.theta2))
+    pthresh = max.(1.0 / maxvar, min.(1.0 / minvar, -g.theta2))
     DiagGaussianNatParam(pthresh.*mthresh, -pthresh)
 end
 function project(g::DGaussMP; minmu=-Inf, maxmu=Inf,
@@ -151,67 +151,4 @@ function project(g::DGaussMP; minmu=-Inf, maxmu=Inf,
     mthresh = max.(minmu,  min.(maxmu,  mean(g)))
     vthresh = max.(minvar, min.(maxvar, var(g)))
     DiagGaussianMeanParam(mean=mthresh, cov=vthresh)
-end
-
-#############################################
-## loglik, gradient of loglik
-#############################################
-
-const neghalflog2pi = -.5log(2pi)
-
-function loglik(g::GaussNP, x::AbstractArray{Float};
-                axis::Int=2)::Union{Float,Vector{Float}}
-    precmu   = g.theta1
-    sqrtprec = chol(-g.theta2)
-    tmp      = sqrtprec'\precmu
-    __f(x)   = ( dot(x,g.theta2*x) + 2dot(x,precmu) )/2
-    result   = sum(neghalflog2pi + log.(diag(sqrtprec))) - norm(tmp)^2/2
-    if length(size(x))==1
-        # single vector
-        result += __f(x)
-    else
-        @assert axis in [1,2] "unknown axis index"
-        @assert size(x)[axis==2?1:2]==length(precmu) "dimensions don't match"
-        if axis == 1
-            # read by rows
-            result += [__f(x[i,:]) for i in 1:size(x)[1]]
-        else
-            # read by columns
-            result += [__f(x[:,i]) for i in 1:size(x)[2]]
-        end
-    end
-    result
-end
-function loglik(g::DGaussNP, x::AbstractArray{Float},
-                axis::Int=2)::Union{Float,Vector{Float}}
-    # XXX
-    # NOTE here, transforming from single input to multi input!
-    precmu   = g.theta1
-    sqrtprec = sqrt.(-g.theta2)
-    tmp      = precmu./sqrtprec
-    sum(neghalflog2pi + log.(sqrtprec)) +
-        ( dot(x, g.theta2 .* x ) + 2dot(x,precmu) - norm(tmp)^2 )/2
-end
-function loglik(g::GaussMP, x::Vector{Float})::Float
-    sqrtcov = chol(cov(g))
-    delta   = sqrtcov'\(x-g.mu1)
-    sum(neghalflog2pi - log.(diag(sqrtcov))) - norm(delta)^2/2
-end
-function loglik(g::DGaussMP, x::Vector{Float})::Float
-    stds  = std(g)
-    delta = (x-g.mu1)./stds
-    sum(neghalflog2pi - log.(stds)) - norm(delta)^2/2
-end
-
-function gradloglik(g::GaussNP, x::Vector{Float})::Vector{Float}
-    g.theta1 + g.theta2*x
-end
-function gradloglik(g::DGaussNP, x::Vector{Float})::Vector{Float}
-    g.theta1 + g.theta2 .* x
-end
-function gradloglik(g::GaussMP, x::Vector{Float})::Vector{Float}
-    cov(g)\(g.mu1 - x)
-end
-function gradloglik(g::DGaussMP, x::Vector{Float})::Vector{Float}
-    (g.mu1 - x)./cov(g)
 end
