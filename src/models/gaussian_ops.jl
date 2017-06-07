@@ -3,7 +3,7 @@
 #######################################
 
 function natparam(g::GaussMP)::GaussNP
-    P = inv(Symmetric(2g.mu2.data-g.mu1*g.mu1'))
+    P = pinv(2g.mu2.data-g.mu1*g.mu1')
     GaussianNatParam(P*g.mu1, -P)
 end
 function natparam(g::DGaussMP)::DGaussNP
@@ -13,7 +13,7 @@ end
 function meanparam(g::GaussNP, correction::Float=1.0)::GaussMP
     # NOTE correction -> may want to use (N-P-2)/(N-1) if g.theta2 is noisy,
     # NOTE see litt for estimation of precision matrix.
-    cov = -inv(g.theta2.data)*correction
+    cov = -pinv(g.theta2.data)*correction
     mu1 = cov * g.theta1
     GaussianMeanParam(mu1, (mu1*mu1' + cov)/2)
 end
@@ -34,7 +34,7 @@ Base.mean(g::GaussNP)  = -g.theta2\g.theta1
 Base.mean(g::DGaussNP) = -g.theta1./g.theta2
 Base.mean(g::GaussMP)  = g.mu1
 Base.mean(g::DGaussMP) = g.mu1
-Base.cov(g ::GaussNP)  = -inv(g.theta2)
+Base.cov(g ::GaussNP)  = -pinv(g.theta2.data)
 Base.cov(g ::DGaussNP) = -1./g.theta2
 Base.cov(g ::GaussMP)  = 2g.mu2.data-g.mu1*g.mu1'
 Base.cov(g ::DGaussMP) = 2g.mu2-g.mu1.^2
