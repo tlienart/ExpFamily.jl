@@ -24,6 +24,7 @@ export
 
 import Base.+, Base.-, Base.*, Base./, Base.-
 
+include("models/tools.jl")
 include("models/gaussian.jl")
 include("models/gaussian_ops.jl")
 include("models/gaussian_loglik.jl")

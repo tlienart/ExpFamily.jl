@@ -56,17 +56,17 @@ Base.ones(::Type{GaussMP}, d::Int) =
 Base.ones(::Type{DGaussMP}, d::Int) =
     DiagGaussianMeanParam(mean=zeros(d), cov=ones(d))
 # NOTE zeros does not really make sense, just use a one with variance
-# NOTE to infinity or to zero based on use case
+# to infinity or to zero based on use case
 
 Base.length(g::Union{GaussNP, DGaussNP}) = length(g.theta1)
 Base.length(g::Union{GaussMP, DGaussMP}) = length(g.mu1)
 
 Base.rand(g::GaussNP, n::Int=1) =
-    repmat(mean(g),1,n)+chol(-g.theta2)\randn(length(g), n)
+    broadcast(+, mean(g), chol(-g.theta2)\randn(length(g), n))
 Base.rand(g::GaussMP, n::Int=1) =
-    repmat(mean(g),1,n)+chol(cov(g))*randn(length(g), n)
+    broadcast(+, mean(g), chol(cov(g))*randn(length(g), n))
 Base.rand(g::Union{DGaussNP, DGaussMP}, n::Int=1) =
-    repmat(mean(g),1,n)+repmat(std(g),1,n).*randn(length(g),n)
+    broadcast(+, mean(g), broadcast(*, std(g), randn(length(g),n)))
 
 Base.vec(g::GaussNP)  = [g.theta1;g.theta2[:]]
 Base.vec(g::DGaussNP) = [g.theta1;g.theta2]
